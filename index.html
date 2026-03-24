@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Francês Fluido com Daby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .correct-answer { border-color: #10b981 !important; background-color: #ecfdf5 !important; }
+    .incorrect-answer { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen p-4 md:p-8">
+<div class="max-w-6xl mx-auto">
+  <header class="mb-10 text-center space-y-2">
+    <div class="inline-flex items-center justify-center p-3 bg-blue-600 text-white rounded-2xl mb-4 shadow-lg shadow-blue-200">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+      </svg>
+    </div>
+    <h1 class="text-4xl font-black tracking-tight text-slate-800">
+      Francês Fluido <span class="text-blue-600">com Daby</span>
+    </h1>
+    <p class="text-slate-500 max-w-lg mx-auto">
+      Domine as ligações, elisões e expressões que os franceses realmente usam.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <nav id="tab-container" class="lg:col-span-4 space-y-2 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar"></nav>
+    <main class="lg:col-span-8">
+      <div class="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 p-8 min-h-[500px] flex flex-col relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
+        <div id="content-display" class="relative z-10 flex-1 overflow-y-auto"></div>
+        <div class="mt-8 flex justify-between gap-4 relative z-10 pt-4 border-t border-slate-100">
+          <button id="prev-btn" class="px-6 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">← Anterior</button>
+          <button id="next-btn" class="px-6 py-3 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">Próxima →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="mt-12 text-center text-slate-400 text-sm">
+    <p>Criado com dedicação por Daby • 2024</p>
+  </footer>
+</div>
+
+<script>
+let activeTab = 0;
+
+const phrasesData = [
+  { title: "🧭 Mapa do Francês Fluido", translation: "Guia rápido", isOverview: true },
+
+  // BLOCO 13 – Respostas, reações, necessidade
+  {
+    title: "D'accord",
+    translation: "De acordo / Ok",
+    writing: "D'accord",
+    native: "D'accord",
+    brazilian: "Dacór",
+    context: "✅ FORMAL E INFORMAL — O 'ok' francês por excelência. Funciona em qualquer situação.",
+    explanation: "Vem de 'de accord'. O 'e' de 'de' some por elisão e vira 'd'accord'. Na prática é uma palavra só.",
+    exampleSentence: "— On se voit demain à 18h ? — D'accord.",
+    exampleTranslation: "— A gente se vê amanhã às 18h? — Ok, combinado.",
+    exerciseSituation: "Alguém te propõe um horário para uma reunião e você quer responder 'Ok'.",
+    exerciseQuestionFr: "Comment réponds-tu à une proposition en disant « Ok »?",
+    exerciseQuestionPt: "Como você responde a uma proposta dizendo « Ok »?",
+    exerciseCorrectAnswer: ["D'accord","d'accord"]
+  },
+  {
+    title: "Bien sûr",
+    translation: "Claro / Com certeza",
+    writing: "Bien sûr",
+    native: "Bien sûr",
+    brazilian: "Biẽ sür",
+    context: "✅ FORMAL E INFORMAL — Expressão-chave para confirmar com convicção.",
+    explanation: "Sem elisão especial. O segredo é o 'bien' nasal (biẽ) e o 'ü' de 'sûr'.",
+    exampleSentence: "— Tu peux m'aider ? — Bien sûr !",
+    exampleTranslation: "— Você pode me ajudar? — Claro!",
+    exerciseSituation: "Um amigo te pede um favor simples e você quer dizer 'claro, lógico'.",
+    exerciseQuestionFr: "Comment dis-tu « Claro! » em francês?",
+    exerciseQuestionPt: "Como você diz « Claro! » em francês?",
+    exerciseCorrectAnswer: ["Bien sûr","bien sûr"]
+  },
+  {
+    title: "En fait",
+    translation: "Na verdade / De fato",
+    writing: "En fait",
+    native: "En fait",
+    brazilian: "Ã fét",
+    context: "✅ FORMAL E INFORMAL — Usado para corrigir ou introduzir explicação.",
+    explanation: "Sem ligação especial. O importante é o 'en' nasal (ã) e o 't' leve de 'fait'.",
+    exampleSentence: "En fait, je ne peux pas venir ce soir.",
+    exampleTranslation: "Na verdade, eu não posso vir hoje à noite.",
+    exerciseSituation: "Você quer corrigir alguém de forma suave, começando com 'na verdade...'.",
+    exerciseQuestionFr: "Comment commences-tu une phrase avec « Na verdade... »?",
+    exerciseQuestionPt: "Como você começa uma frase com « Na verdade... »?",
+    exerciseCorrectAnswer: ["En fait","en fait"]
+  },
+  {
+    title: "Tout de suite",
+    translation: "Imediatamente / Agora mesmo",
+    writing: "Tout de suite",
+    native: "Tout d'suite",
+    brazilian: "Tu d'süit",
+    context: "✅ FORMAL E INFORMAL — Usado em qualquer contexto.",
+    explanation: "Na fala, o 'e' de 'de' cai: 'de' → 'd''. O 't' de 'tout' é mudo. Resultado natural: 'tu d'süit'.",
+    exampleSentence: "J'arrive tout de suite.",
+    exampleTranslation: "Eu chego já / agora mesmo.",
+    exerciseSituation: "Alguém te chama e você quer dizer que já está indo.",
+    exerciseQuestionFr: "Comment dis-tu « Tô indo agora mesmo »?",
+    exerciseQuestionPt: "Como você diz « Tô indo agora mesmo »?",
+    exerciseCorrectAnswer: ["J'arrive tout de suite","j'arrive tout de suite"]
+  },
+  {
+    title: "Je t'en prie",
+    translation: "Por favor / De nada",
+    writing: "Je t'en prie",
+    native: "Je t'en prie",
+    brazilian: "J'tã pri",
+    context: "✅ FORMAL E INFORMAL — Principalmente 'de nada' educado.",
+    explanation: "O 'e' de 'te' some: 'je te en prie' → 'je t'en prie' → 'j'tã pri'. Muito mais elegante que 'de rien'.",
+    exampleSentence: "— Merci beaucoup ! — Je t'en prie.",
+    exampleTranslation: "— Muito obrigado! — De nada.",
+    exerciseSituation: "Alguém te agradece e você quer responder de forma educada.",
+    exerciseQuestionFr: "Comment réponds-tu « De nada » de forma mais educada?",
+    exerciseQuestionPt: "Como você responde « De nada » de forma mais educada?",
+    exerciseCorrectAnswer: ["Je t'en prie","je t'en prie"]
+  },
+  {
+    title: "Il faut que je parte / Faut qu'je parte",
+    translation: "Eu preciso ir / Tenho que ir",
+    writing: "Il faut que je parte / Faut qu'je parte",
+    native: "Il fô kê je part / Fô k'jê part",
+    brazilian: "Il fô kê je part / Fô k'jê part",
+    context: "Formal: 'Il faut que je parte'. Informal: 'Faut qu'je parte'.",
+    explanation: "Na fala informal, o 'il' cai e o 'e' de 'que' some: 'faut qu'je'. É o 'tenho que ir', 'preciso ir embora'.",
+    exampleSentence: "Faut qu'je parte, j'ai rendez-vous.",
+    exampleTranslation: "Eu preciso ir, tenho um compromisso.",
+    exerciseSituation: "Você está num encontro e precisa ir embora.",
+    exerciseQuestionFr: "Comment dis-tu « Eu preciso ir » de forma informal?",
+    exerciseQuestionPt: "Como você diz « Eu preciso ir » de forma informal?",
+    exerciseCorrectAnswer: ["Faut qu'je parte","faut qu'je parte","Il faut que je parte","il faut que je parte"]
+  },
+  {
+    title: "Ce n'est pas mal / C'est pas mal",
+    translation: "Não é ruim / É legal",
+    writing: "Ce n'est pas mal / C'est pas mal",
+    native: "Ce n'è pa mal / C'est pas mal",
+    brazilian: "Sê nê pá mal / Sê pá mal",
+    context: "✅ FORMAL E INFORMAL — Elogio moderado, 'é legal', 'é bom até'.",
+    explanation: "Formal: 'Ce n'est pas mal'. Na fala, o 'ne' cai: 'C'est pas mal'. Muitas vezes significa 'é até bem bom'.",
+    exampleSentence: "Ce film, c'est pas mal du tout.",
+    exampleTranslation: "Esse filme é bem legal.",
+    exerciseSituation: "Você quer elogiar sem exagerar.",
+    exerciseQuestionFr: "Comment dis-tu « É legal » usando « pas mal »?",
+    exerciseQuestionPt: "Como você diz « É legal » usando « pas mal »?",
+    exerciseCorrectAnswer: ["C'est pas mal","c'est pas mal","Ce n'est pas mal","ce n'est pas mal"]
+  },
+  {
+    title: "Je n'ai pas le temps / J'ai pas l'temps",
+    translation: "Eu não tenho tempo",
+    writing: "Je n'ai pas le temps / J'ai pas l'temps",
+    native: "Je n'ê pa le tã / J'ai pas l'temps",
+    brazilian: "Je nê pá le tã / J'ê pá l'tã",
+    context: "✅ FORMAL E INFORMAL — Para recusar convites ou mostrar que está ocupado.",
+    explanation: "Formal: 'Je n'ai pas le temps'. Informal: 'J'ai pas le temps' ou 'J'ai pas l'temps' (o 'e' de 'le' cai).",
+    exampleSentence: "Désolé, j'ai pas l'temps aujourd'hui.",
+    exampleTranslation: "Desculpa, eu não tenho tempo hoje.",
+    exerciseSituation: "Você quer recusar um convite pois está sem tempo.",
+    exerciseQuestionFr: "Comment dis-tu « Eu não tenho tempo hoje » de forma informal?",
+    exerciseQuestionPt: "Como você diz « Eu não tenho tempo hoje » de forma informal?",
+    exerciseCorrectAnswer: ["J'ai pas le temps aujourd'hui","j'ai pas le temps aujourd'hui","J'ai pas l'temps aujourd'hui","j'ai pas l'temps aujourd'hui"]
+  },
+  {
+    title: "Ça y est !",
+    translation: "Pronto! / Consegui!",
+    writing: "Ça y est !",
+    native: "Ça y est !",
+    brazilian: "Sá-i ê!",
+    context: "✅ FORMAL E INFORMAL — Quando algo finalmente deu certo ou terminou.",
+    explanation: "Literalmente 'isso aí está', mas significa 'pronto!', 'foi!', 'deu certo!'. A frase gruda em 'sáiê!'.",
+    exampleSentence: "Ça y est, j'ai fini le travail !",
+    exampleTranslation: "Pronto, terminei o trabalho!",
+    exerciseSituation: "Você termina uma tarefa difícil e quer dizer 'pronto, consegui!'.",
+    exerciseQuestionFr: "Comment dis-tu « Pronto, consegui! »?",
+    exerciseQuestionPt: "Como você diz « Pronto, consegui! »?",
+    exerciseCorrectAnswer: ["Ça y est, j'ai fini","ça y est, j'ai fini","Ça y est !","ça y est !"]
+  },
+  {
+    title: "Je suis désolé / Chuis désolé",
+    translation: "Eu sinto muito / Desculpe",
+    writing: "Je suis désolé / Chuis désolé",
+    native: "Je sui désolé / Chuis désolé",
+    brazilian: "Je süi dezolê / Chüi dezolê",
+    context: "Formal: 'Je suis désolé'. Informal: 'Chuis désolé'.",
+    explanation: "Na fala rápida, 'Je suis' vira 'Chuis' (chüi). Use 'Je suis désolé' em contexto formal e 'Chuis désolé' entre amigos.",
+    exampleSentence: "Je suis désolé pour le retard. / Chuis désolé pour le retard.",
+    exampleTranslation: "Desculpa pelo atraso.",
+    exerciseSituation: "Você chegou atrasado e quer se desculpar.",
+    exerciseQuestionFr: "Comment dis-tu « Desculpa pelo atraso »?",
+    exerciseQuestionPt: "Como você diz « Desculpa pelo atraso »?",
+    exerciseCorrectAnswer: ["Je suis désolé pour le retard","je suis désolé pour le retard","Chuis désolé pour le retard","chuis désolé pour le retard"]
+  },
+
+  // BLOCO 14 – Quantidades
+  {
+    title: "Un peu de",
+    translation: "Um pouco de",
+    writing: "Un peu de / Un p'tit peu de",
+    native: "Un p'tit peu d'",
+    brazilian: "Ã p'ti pê d'",
+    context: "✅ FORMAL: 'un peu de'. INFORMAL: 'un p'tit peu de', muito frequente.",
+    explanation: "'Un peu de' vira 'un p'tit peu de' para suavizar: 'só um pouquinho'. O 'e' de 'de' cai antes de vogal: 'd''.",
+    exampleSentence: "Tu veux un p'tit peu d'eau ?",
+    exampleTranslation: "Você quer um pouquinho de água?",
+    exerciseSituation: "Você oferece um pouco de café para alguém.",
+    exerciseQuestionFr: "Comment proposes-tu « um pouco de café »?",
+    exerciseQuestionPt: "Como você propõe « um pouco de café »?",
+    exerciseCorrectAnswer: ["Un peu de café","un peu de café","Un p'tit peu de café","un p'tit peu de café"]
+  },
+  {
+    title: "Beaucoup de",
+    translation: "Muito de",
+    writing: "Beaucoup de / Beaucoup d'",
+    native: "Bocou d'",
+    brazilian: "Bocu d'",
+    context: "✅ FORMAL E INFORMAL — Base para 'muito de' qualquer coisa.",
+    explanation: "O 'p' de 'beaucoup' é mudo. Com vogal depois, 'de' → 'd'': 'beaucoup d'amis'.",
+    exampleSentence: "Il a beaucoup d'amis.",
+    exampleTranslation: "Ele tem muitos amigos.",
+    exerciseSituation: "Você quer dizer que tem muito trabalho.",
+    exerciseQuestionFr: "Comment dis-tu « Eu tenho muito trabalho »?",
+    exerciseQuestionPt: "Como você diz « Eu tenho muito trabalho »?",
+    exerciseCorrectAnswer: ["J'ai beaucoup de travail","j'ai beaucoup de travail"]
+  },
+  {
+    title: "Trop de",
+    translation: "Demais de",
+    writing: "Trop de / Trop d'",
+    native: "Trô d'",
+    brazilian: "Trôp d'",
+    context: "✅ FORMAL E INFORMAL — Quando algo é 'demais', 'em excesso'.",
+    explanation: "O 'p' de 'trop' é mudo. Com vogal, 'de' → 'd'': 'trop d'informations'.",
+    exampleSentence: "Il y a trop de bruit ici.",
+    exampleTranslation: "Tem barulho demais aqui.",
+    exerciseSituation: "Você quer reclamar que tem gente demais em um lugar.",
+    exerciseQuestionFr: "Comment dis-tu « Tem gente demais aqui »?",
+    exerciseQuestionPt: "Como você diz « Tem gente demais aqui »?",
+    exerciseCorrectAnswer: ["Il y a trop de monde ici","il y a trop de monde ici"]
+  },
+  {
+    title: "Plus de",
+    translation: "Mais de",
+    writing: "Plus de / Plus d'",
+    native: "Plu d'",
+    brazilian: "Plü d'",
+    context: "✅ FORMAL E INFORMAL — Para dizer 'mais de X'.",
+    explanation: "Em 'plus de', o 's' é mudo. Com vogal depois, 'de' → 'd'': 'plus d'idées'.",
+    exampleSentence: "Il y a plus de vingt personnes.",
+    exampleTranslation: "Tem mais de vinte pessoas.",
+    exerciseSituation: "Você quer dizer que tem mais de dez alunos.",
+    exerciseQuestionFr: "Comment dis-tu « Tem mais de dez alunos »?",
+    exerciseQuestionPt: "Como você diz « Tem mais de dez alunos »?",
+    exerciseCorrectAnswer: ["Il y a plus de dix élèves","il y a plus de dix élèves"]
+  },
+  {
+    title: "Moins de",
+    translation: "Menos de",
+    writing: "Moins de / Moins d'",
+    native: "Muẽ d'",
+    brazilian: "Muẽ d'",
+    context: "✅ FORMAL E INFORMAL — Para dizer 'menos de X'.",
+    explanation: "O 's' de 'moins' é mudo; soa 'muẽ'. Com vogal depois, 'de' → 'd'': 'moins d'argent'.",
+    exampleSentence: "On a moins de temps que prévu.",
+    exampleTranslation: "A gente tem menos tempo do que previsto.",
+    exerciseSituation: "Você quer dizer que a gente tem menos de uma hora.",
+    exerciseQuestionFr: "Comment dis-tu « A gente tem menos de uma hora »?",
+    exerciseQuestionPt: "Como você diz « A gente tem menos de uma hora »?",
+    exerciseCorrectAnswer: ["On a moins d'une heure","on a moins d'une heure"]
+  },
+
+  // BLOCO 15 – Tempo e frequência
+  {
+    title: "De temps en temps",
+    translation: "De vez em quando",
+    writing: "De temps en temps",
+    native: "De tem-z-en tem",
+    brazilian: "Dê tã-zã tã",
+    context: "✅ FORMAL E INFORMAL — Expressão clássica para 'de vez em quando'.",
+    explanation: "O 's' de 'temps' se pronuncia como 'z' antes de 'en': 'tem-Z-en'. A sequência vira 'de tã-zã tã'.",
+    exampleSentence: "De temps en temps, je vais au cinéma.",
+    exampleTranslation: "De vez em quando, eu vou ao cinema.",
+    exerciseSituation: "Você quer dizer que estuda francês de vez em quando.",
+    exerciseQuestionFr: "Comment dis-tu « Eu estudo francês de vez em quando »?",
+    exerciseQuestionPt: "Como você diz « Eu estudo francês de vez em quando »?",
+    exerciseCorrectAnswer: ["J'étudie le français de temps en temps","j'étudie le français de temps en temps"]
+  },
+  {
+    title: "Tous les jours",
+    translation: "Todos os dias",
+    writing: "Tous les jours",
+    native: "Tou-z-lè jour",
+    brazilian: "Tu-zlê jur",
+    context: "✅ FORMAL E INFORMAL — Expressão padrão para rotina diária.",
+    explanation: "O 's' de 'tous' se pronuncia como 'z' antes de 'les'. O 's' de 'jours' é mudo.",
+    exampleSentence: "Je bois du café tous les jours.",
+    exampleTranslation: "Eu tomo café todos os dias.",
+    exerciseSituation: "Você quer dizer que pratica francês todos os dias.",
+    exerciseQuestionFr: "Comment dis-tu « Eu pratico francês todos os dias »?",
+    exerciseQuestionPt: "Como você diz « Eu pratico francês todos os dias »?",
+    exerciseCorrectAnswer: ["Je pratique le français tous les jours","je pratique le français tous les jours"]
+  },
+  {
+    title: "Chaque année",
+    translation: "Todo ano / Cada ano",
+    writing: "Chaque année",
+    native: "Chak-année",
+    brazilian: "Chak-anê",
+    context: "✅ FORMAL E INFORMAL — Usado para falar de eventos anuais.",
+    explanation: "O 'e' de 'chaque' é fraco e quase cai antes de 'année': 'chak-anê'.",
+    exampleSentence: "On part en vacances chaque année.",
+    exampleTranslation: "A gente sai de férias todo ano.",
+    exerciseSituation: "Você quer dizer que visita sua família todo ano.",
+    exerciseQuestionFr: "Comment dis-tu « Eu visito minha família todo ano »?",
+    exerciseQuestionPt: "Como você diz « Eu visito minha família todo ano »?",
+    exerciseCorrectAnswer: ["Je visite ma famille chaque année","je visite ma famille chaque année"]
+  },
+  {
+    title: "L'année dernière",
+    translation: "No ano passado",
+    writing: "L'année dernière",
+    native: "L'année dernière",
+    brazilian: "Lanê derniér",
+    context: "✅ FORMAL E INFORMAL — Para se referir ao ano passado.",
+    explanation: "'La année' → 'L'année' por elisão obrigatória, soando 'lanê'.",
+    exampleSentence: "L'année dernière, on est allés en France.",
+    exampleTranslation: "No ano passado, a gente foi pra França.",
+    exerciseSituation: "Você quer falar de algo que aconteceu com você no ano passado.",
+    exerciseQuestionFr: "Comment dis-tu « No ano passado eu estava na França »?",
+    exerciseQuestionPt: "Como você diz « No ano passado eu estava na França »?",
+    exerciseCorrectAnswer: ["L'année dernière, j'étais en France","l'année dernière, j'étais en france"]
+  },
+  {
+    title: "Le mois prochain",
+    translation: "No próximo mês",
+    writing: "Le mois prochain",
+    native: "Le moi prochain",
+    brazilian: "Lê muá prochẽ",
+    context: "✅ FORMAL E INFORMAL — Para falar do mês seguinte.",
+    explanation: "Sem ligação especial. 'Mois' soa 'muá' (s mudo).",
+    exampleSentence: "Le mois prochain, je commence un nouveau travail.",
+    exampleTranslation: "No próximo mês, eu começo um novo trabalho.",
+    exerciseSituation: "Você quer dizer que vai se mudar no próximo mês.",
+    exerciseQuestionFr: "Comment dis-tu « Eu vou me mudar no próximo mês »?",
+    exerciseQuestionPt: "Como você diz « Eu vou me mudar no próximo mês »?",
+    exerciseCorrectAnswer: ["Je vais déménager le mois prochain","je vais déménager le mois prochain"]
+  },
+
+  // BLOCO 16 – Coup de…
+  {
+    title: "Coup de main",
+    translation: "Ajuda / Mãozinha",
+    writing: "Coup de main",
+    native: "Cou d'main",
+    brazilian: "Cu d'mẽ",
+    context: "✅ FORMAL E INFORMAL — Pedir ou oferecer ajuda prática.",
+    explanation: "O 'p' de 'coup' é mudo. O 'e' de 'de' cai: 'd'main'. 'Donner un coup de main' = 'dar uma mão'.",
+    exampleSentence: "Tu peux me donner un coup de main ?",
+    exampleTranslation: "Você pode me dar uma mão?",
+    exerciseSituation: "Você precisa de ajuda para carregar algo pesado.",
+    exerciseQuestionFr: "Comment demandes-tu « Você pode me dar uma mão? »?",
+    exerciseQuestionPt: "Como você pergunta « Você pode me dar uma mão? »?",
+    exerciseCorrectAnswer: ["Tu peux me donner un coup de main ?","tu peux me donner un coup de main ?"]
+  },
+  {
+    title: "Coup de tête",
+    translation: "Decisão impulsiva / Cabeçada",
+    writing: "Coup de tête",
+    native: "Cou d'tête",
+    brazilian: "Cu d'tét",
+    context: "✅ FORMAL E INFORMAL — Pode ser literal (cabeçada) ou figurado (decisão impulsiva).",
+    explanation: "Mesmo padrão: 'coup' sem 'p', 'de' → 'd''. 'Sur un coup de tête' = 'por impulso'.",
+    exampleSentence: "Il a démissionné sur un coup de tête.",
+    exampleTranslation: "Ele pediu demissão por impulso.",
+    exerciseSituation: "Você quer falar de uma decisão tomada sem pensar.",
+    exerciseQuestionFr: "Comment dis-tu « Ele fez isso por impulso »?",
+    exerciseQuestionPt: "Como você diz « Ele fez isso por impulso »?",
+    exerciseCorrectAnswer: ["Il a fait ça sur un coup de tête","il a fait ça sur un coup de tête"]
+  },
+  {
+    title: "Coup de pied",
+    translation: "Chute",
+    writing: "Coup de pied",
+    native: "Cou d'pied",
+    brazilian: "Cu d'piê",
+    context: "✅ FORMAL E INFORMAL — Literalmente 'golpe de pé'.",
+    explanation: "Mesma elisão. Usado em esportes e no cotidiano.",
+    exampleSentence: "Il a donné un coup de pied dans le ballon.",
+    exampleTranslation: "Ele deu um chute na bola.",
+    exerciseSituation: "Você descreve um movimento em um jogo de futebol.",
+    exerciseQuestionFr: "Comment dis-tu « Ele deu um chute na bola »?",
+    exerciseQuestionPt: "Como você diz « Ele deu um chute na bola »?",
+    exerciseCorrectAnswer: ["Il a donné un coup de pied dans le ballon","il a donné un coup de pied dans le ballon"]
+  },
+  {
+    title: "Coup de foudre",
+    translation: "Paixão à primeira vista",
+    writing: "Coup de foudre",
+    native: "Cou d'foudre",
+    brazilian: "Cu d'fudr",
+    context: "✅ FORMAL E INFORMAL — Literalmente 'golpe de raio'.",
+    explanation: "De novo, 'coup' sem 'p', 'de' → 'd''. 'Coup de foudre' é paixão à primeira vista.",
+    exampleSentence: "Ça a été le coup de foudre dès le premier regard.",
+    exampleTranslation: "Foi paixão à primeira vista desde o primeiro olhar.",
+    exerciseSituation: "Você quer falar de um amor à primeira vista.",
+    exerciseQuestionFr: "Comment dis-tu « Foi paixão à primeira vista »?",
+    exerciseQuestionPt: "Como você diz « Foi paixão à primeira vista »?",
+    exerciseCorrectAnswer: ["Ça a été le coup de foudre","ça a été le coup de foudre"]
+  },
+  {
+    title: "Coup de soleil",
+    translation: "Queimadura de sol",
+    writing: "Coup de soleil",
+    native: "Cou d'soleil",
+    brazilian: "Cu d'solêi",
+    context: "✅ FORMAL E INFORMAL — Ficar vermelho de sol.",
+    explanation: "Mesma estrutura. 'Coup de soleil' é queimadura de sol.",
+    exampleSentence: "J'ai pris un coup de soleil à la plage.",
+    exampleTranslation: "Eu peguei uma queimadura de sol na praia.",
+    exerciseSituation: "Você volta da praia vermelho e comenta isso.",
+    exerciseQuestionFr: "Comment dis-tu « Eu peguei queimadura de sol »?",
+    exerciseQuestionPt: "Como você diz « Eu peguei queimadura de sol »?",
+    exerciseCorrectAnswer: ["J'ai pris un coup de soleil","j'ai pris un coup de soleil"]
+  },
+  {
+    title: "Coup de fil",
+    translation: "Ligação telefônica rápida",
+    writing: "Coup de fil",
+    native: "Cou d'fil",
+    brazilian: "Cu d'fil",
+    context: "✅ FORMAL E INFORMAL — Uma ligação rápida, 'dar um toque'.",
+    explanation: "'Donner un coup de fil' = 'dar uma ligada'.",
+    exampleSentence: "Je te donne un coup de fil ce soir.",
+    exampleTranslation: "Eu te dou uma ligada hoje à noite.",
+    exerciseSituation: "Você quer dizer que vai ligar rapidamente para alguém.",
+    exerciseQuestionFr: "Comment dis-tu « Eu te dou uma ligada depois »?",
+    exerciseQuestionPt: "Como você diz « Eu te dou uma ligada depois »?",
+    exerciseCorrectAnswer: ["Je te donne un coup de fil plus tard","je te donne un coup de fil plus tard"]
+  },
+  {
+    title: "Coup de chance",
+    translation: "Golpe de sorte",
+    writing: "Coup de chance",
+    native: "Cou d'chance",
+    brazilian: "Cu d'chãs",
+    context: "✅ FORMAL E INFORMAL — Quando algo deu certo pela sorte.",
+    explanation: "'Coup de chance' = lance de sorte, golpe de sorte.",
+    exampleSentence: "C'était un coup de chance, j'ai trouvé un taxi tout de suite.",
+    exampleTranslation: "Foi um golpe de sorte, encontrei um táxi na hora.",
+    exerciseSituation: "Você conseguiu algo por pura sorte.",
+    exerciseQuestionFr: "Comment dis-tu « Foi um golpe de sorte »?",
+    exerciseQuestionPt: "Como você diz « Foi um golpe de sorte »?",
+    exerciseCorrectAnswer: ["C'était un coup de chance","c'était un coup de chance"]
+  },
+  {
+    title: "Coup de blues",
+    translation: "Tristeza / Deprê",
+    writing: "Coup de blues",
+    native: "Cou d'blues",
+    brazilian: "Cu d'bluz",
+    context: "✅ INFORMAL — Estado de tristeza leve, saudade, 'baixo astral'.",
+    explanation: "'Avoir un coup de blues' = estar meio deprê, pra baixo.",
+    exampleSentence: "J'ai un petit coup de blues ce soir.",
+    exampleTranslation: "Tô meio deprê hoje à noite.",
+    exerciseSituation: "Você quer dizer que está meio triste sem motivo claro.",
+    exerciseQuestionFr: "Comment dis-tu « Tô meio deprê »?",
+    exerciseQuestionPt: "Como você diz « Tô meio deprê »?",
+    exerciseCorrectAnswer: ["J'ai un petit coup de blues","j'ai un petit coup de blues"]
+  },
+  {
+    title: "Coup de gueule",
+    translation: "Bronca / Explosão de raiva",
+    writing: "Coup de gueule",
+    native: "Cou d'gueule",
+    brazilian: "Cu d'gêl",
+    context: "✅ INFORMAL — Dar um 'esporro', uma bronca forte.",
+    explanation: "'Pousser un coup de gueule' = soltar uma bronca, reclamar alto.",
+    exampleSentence: "Il a poussé un coup de gueule contre le patron.",
+    exampleTranslation: "Ele deu uma bronca no chefe.",
+    exerciseSituation: "Você quer falar que alguém deu uma bronca forte.",
+    exerciseQuestionFr: "Comment dis-tu « Ele deu uma bronca » usando « coup de gueule »?",
+    exerciseQuestionPt: "Como você diz « Ele deu uma bronca » usando « coup de gueule »?",
+    exerciseCorrectAnswer: ["Il a poussé un coup de gueule","il a poussé un coup de gueule"]
+  },
+  {
+    title: "Coup de barre",
+    translation: "Cansaço súbito / Baque",
+    writing: "Coup de barre",
+    native: "Cou d'barre",
+    brazilian: "Cu d'bar",
+    context: "✅ INFORMAL — Quando bate um cansaço do nada, geralmente após o almoço.",
+    explanation: "'Avoir un coup de barre' = sentir um baque de cansaço repentino.",
+    exampleSentence: "Après le déjeuner, j'ai eu un coup de barre.",
+    exampleTranslation: "Depois do almoço, me deu um baque de cansaço.",
+    exerciseSituation: "Você quer dizer que bateu aquele sono depois do almoço.",
+    exerciseQuestionFr: "Comment dis-tu « Me deu um baque de cansaço »?",
+    exerciseQuestionPt: "Como você diz « Me deu um baque de cansaço »?",
+    exerciseCorrectAnswer: ["J'ai eu un coup de barre","j'ai eu un coup de barre"]
+  },
+
+  { title: "🎯 Exercícios Finais", translation: "Teste seu conhecimento", isExerciseTab: true }
+];
+
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderTabs() {
+  const container = document.getElementById("tab-container");
+  container.innerHTML = phrasesData.map((phrase, index) => `
+    <button onclick="selectTab(${index})"
+      class="w-full text-left px-4 py-3 rounded-xl border-2 transition-all duration-200
+      ${index === activeTab
+        ? "bg-blue-50 border-blue-500 text-blue-700"
+        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"}">
+      <span class="block font-bold text-sm">${phrase.title}</span>
+      <span class="block text-xs mt-0.5 ${index === activeTab ? "text-blue-400" : "text-slate-400"}">${phrase.translation}</span>
+    </button>
+  `).join("");
+}
+
+function renderContent() {
+  const display = document.getElementById("content-display");
+  const phrase = phrasesData[activeTab];
+  document.getElementById("prev-btn").disabled = activeTab === 0;
+  document.getElementById("next-btn").disabled = activeTab === phrasesData.length - 1;
+
+  if (phrase.isOverview) {
+    display.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-3xl font-black text-slate-800">🧭 Mapa do Francês Fluido</h2>
+          <p class="text-slate-500 mt-1 text-sm">
+            Veja como as expressões se conectam: <strong>ligações</strong>, <strong>elisões</strong> e <strong>coup de…</strong>.
+          </p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Blocos deste módulo</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li>• Bloco 13: Respostas e reações (D'accord, Bien sûr, En fait, …)</li>
+            <li>• Bloco 14: Quantidades (beaucoup de, trop de, moins de…)</li>
+            <li>• Bloco 15: Tempo e frequência (de temps en temps, tous les jours…)</li>
+            <li>• Bloco 16: Expressões com « coup de… » (coup de main, coup de foudre…)</li>
+          </ul>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (phrase.isExerciseTab) {
+    display.innerHTML = `
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-3xl font-black text-slate-800">🎯 Exercícios Finais</h2>
+          <p class="text-slate-500 mt-1">Traduza as expressões do português para o francês.</p>
+        </div>
+        <div class="bg-white border-2 border-slate-200 rounded-2xl p-6">
+          <div id="ex-progress" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"></div>
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+            <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-2">🇧🇷 Em Português</p>
+            <p id="ex-question" class="text-2xl font-black text-blue-900"></p>
+          </div>
+          <input id="ex-input" type="text"
+            class="w-full p-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 mb-3 text-slate-800 text-lg"
+            placeholder="Escreva em francês..."
+            onkeydown="if(event.key==='Enter') checkFinalAnswer()">
+          <div class="flex gap-3">
+            <button onclick="checkFinalAnswer()" class="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">✅ Verificar</button>
+            <button onclick="nextFinalQuestion()" class="flex-1 px-4 py-3 rounded-xl bg-slate-700 text-white font-bold hover:bg-slate-800 transition-colors">➡️ Próxima</button>
+          </div>
+          <div id="ex-feedback" class="mt-4 p-4 rounded-xl border-2 hidden text-base"></div>
+        </div>
+      </div>
+    `;
+    initFinalExercise();
+    return;
+  }
+
+  display.innerHTML = `
+    <div class="space-y-5">
+      <div>
+        <h2 class="text-3xl font-black text-slate-800">${phrase.title}</h2>
+        <p class="text-lg text-blue-600 font-semibold mt-1">${phrase.translation}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">✏️ Escrita Padrão</p>
+          <p class="font-mono text-xl font-bold text-slate-800">${phrase.writing}</p>
+        </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4">
+          <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">🗣️ Pronúncia Fluida Real</p>
+          <p class="font-mono text-xl font-bold text-orange-800">${phrase.native}</p>
+        </div>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-2xl p-4">
+        <p class="text-xs font-bold text-green-500 uppercase tracking-wider mb-2">🇧🇷 Como o Brasileiro Aprende</p>
+        <p class="font-mono text-2xl font-black text-green-800">"${phrase.brazilian}"</p>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+        <p class="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-2">📍 Contexto de Uso</p>
+        <p class="text-yellow-900 font-medium text-sm leading-relaxed">${phrase.context}</p>
+      </div>
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+        <p class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-3">🔍 O Que Acontece</p>
+        <p class="text-blue-900 leading-relaxed text-sm">${phrase.explanation}</p>
+      </div>
+      <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4">
+        <p class="text-xs font-bold text-purple-500 uppercase tracking-wider mb-2">💬 Exemplo em Contexto Real</p>
+        <p class="font-semibold text-purple-900 italic">"${phrase.exampleSentence}"</p>
+        <p class="text-purple-600 text-sm mt-1">${phrase.exampleTranslation}</p>
+      </div>
+      <div class="bg-white border-2 border-slate-200 rounded-2xl p-5">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">✍️ Exercício Prático</p>
+        <div class="bg-slate-50 rounded-xl p-4 mb-4">
+          <p class="text-xs font-semibold text-slate-500 mb-1">📌 Situação:</p>
+          <p class="text-slate-700 text-sm">${phrase.exerciseSituation}</p>
+        </div>
+        <p class="font-bold text-slate-800 mb-1 text-sm">${phrase.exerciseQuestionFr}</p>
+        <p class="text-slate-400 text-xs mb-4 italic">(${phrase.exerciseQuestionPt})</p>
+        <input id="exercise-input" type="text"
+          class="w-full p-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 mb-3 text-slate-800"
+          placeholder="Digite sua resposta em francês..."
+          onkeydown="if(event.key==='Enter') checkAnswer(${activeTab})">
+        <button onclick="checkAnswer(${activeTab})"
+          class="w-full px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors text-sm">
+          Verificar Resposta
+        </button>
+        <div id="exercise-feedback" class="mt-3 p-3 rounded-xl border-2 hidden text-sm"></div>
+      </div>
+    </div>
+  `;
+}
+
+function selectTab(index) {
+  activeTab = index;
+  renderTabs();
+  renderContent();
+  document.getElementById("content-display").scrollTop = 0;
+}
+
+function navigate(direction) {
+  const newIndex = activeTab + direction;
+  if (newIndex >= 0 && newIndex < phrasesData.length) selectTab(newIndex);
+}
+
+document.getElementById("prev-btn").onclick = () => navigate(-1);
+document.getElementById("next-btn").onclick = () => navigate(1);
+
+function checkAnswer(tabIndex) {
+  const input = document.getElementById("exercise-input");
+  const feedback = document.getElementById("exercise-feedback");
+  if (!input || !feedback) return;
+
+  const userAnswer = input.value.trim().toLowerCase();
+  const phrase = phrasesData[tabIndex];
+  const correctAnswers = phrase.exerciseCorrectAnswer.map(a => a.toLowerCase().trim());
+
+  feedback.classList.remove("hidden","correct-answer","incorrect-answer");
+  input.classList.remove("correct-answer","incorrect-answer");
+
+  if (correctAnswers.includes(userAnswer)) {
+    feedback.classList.add("correct-answer");
+    input.classList.add("correct-answer");
+    feedback.innerHTML = "✅ <span class='font-bold text-green-800'>Correto! Muito bem!</span>";
+  } else {
+    feedback.classList.add("incorrect-answer");
+    input.classList.add("incorrect-answer");
+    feedback.innerHTML = `❌ <span class='font-bold text-red-800'>Não exatamente.</span> Resposta esperada: <span class='font-mono font-bold text-red-700'>"${phrase.exerciseCorrectAnswer[0]}"</span>`;
+  }
+}
+
+function translationData() {
+  return phrasesData
+    .filter(p => !p.isExerciseTab && !p.isOverview)
+    .map(p => ({ portuguese: p.translation, french: p.exerciseCorrectAnswer }));
+}
+
+let currentFinalIndex = 0;
+let shuffledFinalData = [];
+
+function initFinalExercise() {
+  shuffledFinalData = shuffleArray(translationData());
+  currentFinalIndex = 0;
+  showFinalQuestion();
+}
+
+function showFinalQuestion() {
+  const qEl = document.getElementById("ex-question");
+  const iEl = document.getElementById("ex-input");
+  const fEl = document.getElementById("ex-feedback");
+  const pEl = document.getElementById("ex-progress");
+  if (!qEl || !iEl || !fEl) return;
+  const current = shuffledFinalData[currentFinalIndex];
+  qEl.textContent = current.portuguese;
+  iEl.value = "";
+  iEl.classList.remove("correct-answer","incorrect-answer");
+  fEl.classList.add("hidden");
+  fEl.innerHTML = "";
+  iEl.focus();
+  if (pEl) pEl.textContent = `Questão ${currentFinalIndex + 1} de ${shuffledFinalData.length}`;
+}
+
+function checkFinalAnswer() {
+  const iEl = document.getElementById("ex-input");
+  const fEl = document.getElementById("ex-feedback");
+  if (!iEl || !fEl) return;
+
+  const userAnswer = iEl.value.trim().toLowerCase();
+  const current = shuffledFinalData[currentFinalIndex];
+  const correctAnswers = current.french.map(a => a.toLowerCase().trim());
+
+  fEl.classList.remove("hidden","correct-answer","incorrect-answer");
+  iEl.classList.remove("correct-answer","incorrect-answer");
+
+  if (correctAnswers.includes(userAnswer)) {
+    fEl.classList.add("correct-answer");
+    iEl.classList.add("correct-answer");
+    fEl.innerHTML = "✅ <span class='font-bold text-green-800'>Correto! Excelente!</span>";
+  } else {
+    fEl.classList.add("incorrect-answer");
+    iEl.classList.add("incorrect-answer");
+    fEl.innerHTML = `❌ <span class='font-bold text-red-800'>Não exatamente.</span> Resposta esperada: <span class='font-mono font-bold text-red-700'>"${current.french[0]}"</span>`;
+  }
+}
+
+function nextFinalQuestion() {
+  currentFinalIndex = (currentFinalIndex + 1) % shuffledFinalData.length;
+  showFinalQuestion();
+}
+
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+window.onload = () => {
+  activeTab = 0;
+  renderTabs();
+  renderContent();
+};
+</script>
+</body>
+</html>
